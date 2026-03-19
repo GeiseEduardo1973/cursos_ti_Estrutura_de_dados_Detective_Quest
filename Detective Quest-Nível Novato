@@ -1,0 +1,126 @@
+// Criado por Geise Severo Eduardo
+// Trabalho de: Estrutura de dados em C++
+// Aluna fazendo dupla graduação em
+// CIências da Computação, 3º Sememstre - Matrícula 202501462731
+// Engenharia de Software, 3º Semestre - Matrícula 202501534724
+// Jogo Detective Quest  - Nivel: Novato
+// Instituição: Estácio
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+// Requisito 29: Estrutura personalizada (Sala) com campos para nome e ponteiros
+typedef struct Sala {
+    char nome[50];            // Requisito 15: String que identifica a sala
+    struct Sala* esquerda;    // Requisito 3: Ponteiro para o filho esquerdo
+    struct Sala* direita;     // Requisito 3: Ponteiro para o filho direito
+} Sala;
+
+// Requisito 20: Função que cria, de forma dinâmica, uma sala com nome
+Sala* criarSala(const char* nome) {
+    // Requisito 30: Uso de malloc para alocação dinâmica
+    Sala* novaSala = (Sala*)malloc(sizeof(Sala));
+
+    if (novaSala == NULL) {
+        printf("Erro ao alocar memoria para a sala!\n");
+        exit(1);
+    }
+
+    strcpy(novaSala->nome, nome);
+    novaSala->esquerda = NULL;
+    novaSala->direita = NULL;
+
+    return novaSala;
+}
+
+// Requisito 21: Função que permite a navegação do jogador pela árvore
+void explorarSalas(Sala* raiz) {
+    Sala* atual = raiz;
+    char escolha;
+
+    printf("\n========================================\n");
+    printf("       BEM-VINDO AO DETECTIVE QUEST     \n");
+    printf("========================================\n");
+
+    // Requisito 12: Exploração contínua até alcançar um nó-folha
+    while (atual != NULL) {
+        // Requisito 13: Exibe o nome de cada sala visitada
+        printf("\n>>> Voce esta no(a): %s\n", atual->nome);
+
+        // Verifica se é um nó-folha (sem saídas)
+        if (atual->esquerda == NULL && atual->direita == NULL) {
+            printf("\n[!] Este comodo nao possui mais saidas. Fim da investigacao!\n");
+            break;
+        }
+
+        // Requisito 25: Menu de opções para navegação
+        printf("----------------------------------------\n");
+        printf("Escolha seu caminho:\n");
+        if (atual->esquerda != NULL) printf(" [e] Ir para a Esquerda (%s)\n", atual->esquerda->nome);
+        if (atual->direita != NULL)  printf(" [d] Ir para a Direita (%s)\n", atual->direita->nome);
+        printf(" [s] Sair do Jogo\n");
+        printf("----------------------------------------\n");
+        printf("Sua escolha: ");
+
+        scanf(" %c", &escolha);
+
+        // Requisito 31: Operadores condicionais para controle das decisões
+        switch (escolha) {
+            case 'e': case 'E':
+                if (atual->esquerda != NULL) {
+                    atual = atual->esquerda;
+                } else {
+                    printf("\n[X] Nao ha porta a esquerda!\n");
+                }
+                break;
+            case 'd': case 'D':
+                if (atual->direita != NULL) {
+                    atual = atual->direita;
+                } else {
+                    printf("\n[X] Nao ha porta a direita!\n");
+                }
+                break;
+            case 's': case 'S':
+                printf("\nEncerrando o caso... Ate logo!\n");
+                return;
+            default:
+                printf("\n[!] Opcao invalida. Tente 'e', 'd' ou 's'.\n");
+        }
+    }
+}
+
+// Função para liberar a memória (Boa prática de programação)
+void liberarMemoria(Sala* raiz) {
+    if (raiz != NULL) {
+        liberarMemoria(raiz->esquerda);
+        liberarMemoria(raiz->direita);
+        free(raiz);
+    }
+}
+
+// Requisito 22: Monta o mapa inicial e dá início à exploração
+int main() {
+    // Requisito 11 e 26: Estrutura da mansão definida manualmente no código
+    Sala* hall = criarSala("Hall de Entrada");
+    Sala* salaEstar = criarSala("Sala de Estar");
+    Sala* cozinha = criarSala("Cozinha");
+    Sala* biblioteca = criarSala("Biblioteca");
+    Sala* escritorio = criarSala("Escritorio");
+    Sala* jardim = criarSala("Jardim");
+
+    // Montando o Mapa (Conexões Manuais)
+    hall->esquerda = salaEstar;
+    hall->direita = cozinha;
+
+    salaEstar->esquerda = biblioteca;
+    salaEstar->direita = escritorio;
+
+    cozinha->direita = jardim;
+// Inicia o jogo
+explorarSalas(hall);
+
+// Finalização
+liberarMemoria(hall);
+return 0;
+}
