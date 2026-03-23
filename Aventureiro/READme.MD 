@@ -1,0 +1,19 @@
+🕵️‍♂️ Detective Quest - Nível Aventureiro
+Este projeto consiste em um sistema de exploração e coleta de pistas baseado em Árvores Binárias, desenvolvido como parte do curso de Estrutura de Dados.
+O objetivo é aplicar conceitos de alocação dinâmica, recursividade e organização de dados em memória.
+🚀 Sobre o ProjetoO software simula um detetive explorando uma mansão.
+ O mapa da mansão é estruturado como uma Árvore Binária , enquanto as pistas coletadas são organizadas automaticamente em uma Árvore Binária de Busca (BST) para garantir a ordenação alfabética ao final da investigação.
+ Estruturas Utilizadas:
+ Árvore Binária de Cômodos: Modela a hierarquia da mansão, onde cada nó representa um ambiente com saídas para esquerda ou direita.
+ BST (Binary Search Tree): Utilizada para o sistema de inventário, inserindo pistas de forma que a visualização final seja sempre ordenada.
+ Structs Personalizadas: Implementação de tipos Sala e PistaNode para gerenciar os dados de forma modular.
+ 🛠️ Requisitos Funcionais:
+ ImplementadosNavegação Interativa: Partida do "Hall de Entrada" com opções de movimento (esquerda/direita) ou saída.
+ Coleta Automática: Ao entrar em um cômodo com evidências, a pista é integrada à árvore de inventário.
+ Relatório Alfabético: Exibição de todos os indícios coletados em ordem crescente de caracteres.
+ Gestão de Memória: Uso de malloc() para criação de nós e funções de liberação para evitar vazamentos.
+ 📂 Organização do CódigoO código segue as diretrizes de modularização solicitadas:criarSala(): Alocação dinâmica de ambientes.
+ inserirPista(): Lógica de inserção ordenada na BST. explorarMansao(): Ciclo principal de navegação e coleta.exibirPistas(): Percurso recursivo para impressão dos dados.
+ 📝 Notas da Desenvolvedora Aluna: Geise Severo Eduardo
+ Instituição: Estácio (3º Semestre)Cursos: Ciência da Computação & Engenharia de Software
+Este projeto foi simplificado para o nível aventureiro, utilizando um mapa pré-definido no código fonte conforme as instruções do docente.
