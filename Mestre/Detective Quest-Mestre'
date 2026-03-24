@@ -1,3 +1,11 @@
+// Criado por Geise Severo Eduardo
+// Trabalho de: Estrutura de dados em C++
+// Aluna fazendo dupla graduação em
+// CIências da Computação, 3º Sememstre - Matrícula 202501462731
+// Engenharia de Software, 3º Semestre - Matrícula 202501534724
+// Jogo Detective Quest  - Nivel: Mestre
+// Instituição: Estácio
+
 #include <iostream>
 #include <string>
 
