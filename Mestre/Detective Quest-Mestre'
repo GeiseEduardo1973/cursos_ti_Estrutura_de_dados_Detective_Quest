@@ -8,31 +8,37 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
-// --- Estruturas de Dados ---
+// --- ESTRUTURAS DE DADOS ---
 
+// Representa um cômodo na mansão (Árvore Binária) 
 struct Sala {
     string nome;
-    string pista;
+    string pista; // Pista estática associada ao cômodo 
     Sala *esquerda, *direita;
 };
 
+// Representa uma pista no inventário (Árvore de Busca Binária - BST) 
 struct NoPista {
     string descricao;
     NoPista *esq, *dir;
 };
 
+// Item da Tabela Hash para associar Pista -> Suspeito 
 struct ItemHash {
     string pista;
     string suspeito;
     bool ocupado = false;
 };
 
-// --- Funções Auxiliares (Documentadas conforme Requisito) ---
+// --- FUNÇÕES DO SISTEMA (DOCUMENTADAS)  ---
 
-// criarSala() – cria dinamicamente um cômodo[cite: 24].
+/**
+ * criarSala() – Cria dinamicamente um cômodo da mansão. 
+ */
 Sala* criarSala(string nome, string pista = "") {
     Sala* nova = new Sala;
     nova->nome = nome;
@@ -41,21 +47,25 @@ Sala* criarSala(string nome, string pista = "") {
     return nova;
 }
 
-// inserirNaHash() – insere associação pista/suspeito na tabela hash[cite: 27].
+/**
+ * inserirNaHash() – Insere a associação entre uma pista e um suspeito na tabela. 
+ */
 void inserirNaHash(ItemHash tabela[], int tam, string pista, string suspeito) {
     int indice = 0;
     for(char c : pista) indice += (unsigned char)c;
     indice %= tam;
 
     while(tabela[indice].ocupado) {
-        indice = (indice + 1) % tam;
+        indice = (indice + 1) % tam; // Tratamento de colisão linear
     }
     tabela[indice].pista = pista;
     tabela[indice].suspeito = suspeito;
     tabela[indice].ocupado = true;
 }
 
-// encontrarSuspeito() – consulta o suspeito correspondente a uma pista[cite: 28].
+/**
+ * encontrarSuspeito() – Consulta qual suspeito corresponde a uma pista na Hash. 
+ */
 string encontrarSuspeito(ItemHash tabela[], int tam, string pista) {
     int indice = 0;
     for(char c : pista) indice += (unsigned char)c;
@@ -67,10 +77,12 @@ string encontrarSuspeito(ItemHash tabela[], int tam, string pista) {
         indice = (indice + 1) % tam;
         if(indice == inicio) break;
     }
-    return "";
+    return "Desconhecido";
 }
 
-// adicionarPista() – insere a pista coletada na árvore BST[cite: 26, 37].
+/**
+ * adicionarPista() – Insere uma pista coletada na árvore BST de forma ordenada. 
+ */
 NoPista* adicionarPista(NoPista* raiz, string pista) {
     if (pista == "") return raiz;
     if (raiz == nullptr) {
@@ -81,70 +93,83 @@ NoPista* adicionarPista(NoPista* raiz, string pista) {
     return raiz;
 }
 
-// contarPistasSuspeito() - Recursão para contar quantas pistas na BST pertencem ao acusado[cite: 40].
-void contarPistasSuspeito(NoPista* raiz, ItemHash tabela[], int tam, string acusado, int &contagem) {
+/**
+ * contarPistasPorAcusado() - Usa recursividade para navegar na BST e validar a acusação. 
+ */
+void contarPistasPorAcusado(NoPista* raiz, ItemHash tabela[], int tam, string acusado, int &total) {
     if (raiz == nullptr) return;
-    contarPistasSuspeito(raiz->esq, tabela, tam, acusado, contagem);
+    contarPistasPorAcusado(raiz->esq, tabela, tam, acusado, total);
     if (encontrarSuspeito(tabela, tam, raiz->descricao) == acusado) {
-        contagem++;
+        total++;
     }
-    contarPistasSuspeito(raiz->dir, tabela, tam, acusado, contagem);
+    contarPistasPorAcusado(raiz->dir, tabela, tam, acusado, total);
 }
 
-// --- Main e Fluxo de Jogo ---
+// --- FLUXO PRINCIPAL DO JOGO ---
 
 int main() {
-    const int TAM_HASH = 10;
-    ItemHash tabela[TAM_HASH];
-    NoPista* inventario = nullptr;
+    const int TAM_HASH = 13;
+    ItemHash tabelaSuspeitos[TAM_HASH];
+    NoPista* inventarioPistas = nullptr;
 
-    // 1. Configurar Tabela Hash (Pista -> Suspeito) [cite: 13]
-    inserirNaHash(tabela, TAM_HASH, "Candelabro Sujo", "Mordomo");
-    inserirNaHash(tabela, TAM_HASH, "Luva de Seda", "Mordomo");
-    inserirNaHash(tabela, TAM_HASH, "Veneno", "Cozinheira");
-    inserirNaHash(tabela, TAM_HASH, "Faca de Cozinha", "Cozinheira");
+    // Configuração inicial: Pistas e Suspeitos (Hash) 
+    inserirNaHash(tabelaSuspeitos, TAM_HASH, "Candelabro Sujo", "Mordomo");
+    inserirNaHash(tabelaSuspeitos, TAM_HASH, "Luva de Seda", "Mordomo");
+    inserirNaHash(tabelaSuspeitos, TAM_HASH, "Veneno", "Cozinheira");
+    inserirNaHash(tabelaSuspeitos, TAM_HASH, "Faca de Cozinha", "Cozinheira");
 
-    // 2. Montar Mansão (Árvore Binária) [cite: 10, 31]
+    // Montagem do Mapa da Mansão (Árvore Binária) 
     Sala* mansao = criarSala("Hall de Entrada");
     mansao->esquerda = criarSala("Biblioteca", "Candelabro Sujo");
     mansao->direita = criarSala("Cozinha", "Faca de Cozinha");
     mansao->esquerda->esquerda = criarSala("Jardim", "Luva de Seda");
     mansao->direita->direita = criarSala("Despensa", "Veneno");
 
-    // 3. Loop de Exploração [cite: 14, 25]
     Sala* atual = mansao;
-    char acao;
-    cout << "--- BEM-VINDO AO DETECTIVE QUEST: NIVEL MESTRE ---" << endl;
+    char comando;
 
+    cout << "=== DETECTIVE QUEST: MASTER UPGRADE ===\n";
+    cout << "Explore a mansao e colete provas para uma acusacao formal.\n";
+
+    // Loop de Exploração [cite: 14, 34]
     while (true) {
-        cout << "\nVoce esta no(a): " << atual->nome << endl;
+        cout << "\n----------------------------------------";
+        cout << "\nVOCE ESTA NO(A): " << atual->nome;
+        
         if (atual->pista != "") {
-            cout << "[!] Pista encontrada: " << atual->pista << endl;
-            inventario = adicionarPista(inventario, atual->pista);
+            cout << "\n[!] PISTA DETECTADA: " << atual->pista;
+            inventarioPistas = adicionarPista(inventarioPistas, atual->pista);
         }
 
-        cout << "Escolha: (e)sq, (d)ir ou (s)air para acusar: ";
-        cin >> acao;
+        cout << "\nComandos: (e)sq | (d)ir | (s)air e acusar: ";
+        cin >> comando;
 
-        if (acao == 's') break;
-        if (acao == 'e' && atual->esquerda) atual = atual->esquerda;
-        else if (acao == 'd' && atual->direita) atual = atual->direita;
-        else cout << "Caminho sem saida!" << endl;
+        if (comando == 's') break;
+
+        if (comando == 'e' && atual->esquerda) {
+            atual = atual->esquerda;
+        } else if (comando == 'd' && atual->direita) {
+            atual = atual->direita;
+        } else {
+            cout << "\n[Aviso] Nao ha caminho por aqui!";
+        }
     }
 
-    // 4. Julgamento Final [cite: 15, 29]
+    // Fase de Julgamento 
     string acusado;
-    cout << "\n--- HORA DA ACUSACAO ---" << endl;
-    cout << "Quem voce deseja acusar? ";
+    int pistasValidas = 0;
+
+    cout << "\n\n=== TRIBUNAL DE JUSTICA ===";
+    cout << "\nDigite o nome do suspeito que voce deseja acusar: ";
     cin >> acusado;
 
-    int totalPistas = 0;
-    contarPistasSuspeito(inventario, tabela, TAM_HASH, acusado, totalPistas);
+    // Verificação automática via BST + Hash 
+    contarPistasPorAcusado(inventarioPistas, tabelaSuspeitos, TAM_HASH, acusado, pistasValidas);
 
-    if (totalPistas >= 2) { // Requisito: pelo menos duas pistas [cite: 16]
-        cout << "\n[SUCESSO] " << acusado << " foi preso(a)! Voce encontrou " << totalPistas << " provas solidas." << endl;
+    if (pistasValidas >= 2) {
+        cout << "\n[VEREDITO] CULPADO! Voce apresentou " << pistasValidas << " provas incontestaveis contra " << acusado << ".\n";
     } else {
-        cout << "\n[FALHA] " << acusado << " foi solto(a) por falta de provas!" << endl;
+        cout << "\n[VEREDITO] INOCENTE! Provas insuficientes (" << pistasValidas << ") para condenar " << acusado << ".\n";
     }
 
     return 0;
